@@ -17,7 +17,10 @@ const userFormSchema = insertUserSchema.extend({
   afterTaxIncome: z.string().min(1, "Income is required"),
   payDay: z.number().optional(),
   lastPayDate: z.string().optional(),
-});
+}).transform((data) => ({
+  ...data,
+  lastPayDate: data.lastPayDate ? new Date(data.lastPayDate) : undefined,
+}));
 
 const budgetFormSchema = insertBudgetSchema.extend({
   fixedCostsPercent: z.string().min(1, "Fixed costs percentage is required"),
@@ -56,13 +59,7 @@ export default function OnboardingForm() {
 
   const createUserMutation = useMutation({
     mutationFn: async (data: z.infer<typeof userFormSchema>) => {
-      const userData = {
-        ...data,
-        afterTaxIncome: data.afterTaxIncome,
-        lastPayDate: data.lastPayDate ? new Date(data.lastPayDate) : null,
-      };
-      
-      return apiRequest('POST', '/api/users', userData);
+      return apiRequest('POST', '/api/users', data);
     },
     onSuccess: (response) => {
       response.json().then((user) => {
