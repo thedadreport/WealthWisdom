@@ -138,11 +138,14 @@ export default function OnboardingForm() {
 
   // Validate budget percentages add up to 100
   const validateBudgetPercentages = () => {
-    const total = parseFloat(budgetForm.watch("fixedCostsPercent")) +
-                 parseFloat(budgetForm.watch("investmentsPercent")) +
-                 parseFloat(budgetForm.watch("savingsPercent")) +
-                 parseFloat(budgetForm.watch("guiltFreeSpendingPercent"));
-    return total === 100;
+    const fixedCosts = parseFloat(budgetForm.watch("fixedCostsPercent") || "0");
+    const investments = parseFloat(budgetForm.watch("investmentsPercent") || "0");
+    const savings = parseFloat(budgetForm.watch("savingsPercent") || "0");
+    const guiltFree = parseFloat(budgetForm.watch("guiltFreeSpendingPercent") || "0");
+    
+    const total = fixedCosts + investments + savings + guiltFree;
+    // Allow for small floating-point precision issues
+    return Math.abs(total - 100) < 0.01;
   };
 
   return (
@@ -392,10 +395,10 @@ export default function OnboardingForm() {
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                   <p className="text-sm text-amber-800">
                     Your percentages must add up to 100%. Current total: {
-                      parseFloat(budgetForm.watch("fixedCostsPercent") || "0") +
+                      (parseFloat(budgetForm.watch("fixedCostsPercent") || "0") +
                       parseFloat(budgetForm.watch("investmentsPercent") || "0") +
                       parseFloat(budgetForm.watch("savingsPercent") || "0") +
-                      parseFloat(budgetForm.watch("guiltFreeSpendingPercent") || "0")
+                      parseFloat(budgetForm.watch("guiltFreeSpendingPercent") || "0")).toFixed(1)
                     }%
                   </p>
                 </div>

@@ -84,10 +84,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/budgets", async (req, res) => {
     try {
+      console.log("Creating budget with data:", req.body);
       const budgetData = insertBudgetSchema.parse(req.body);
+      console.log("Parsed budget data:", budgetData);
       const budget = await storage.createBudget(budgetData);
+      console.log("Created budget:", budget);
       res.status(201).json(budget);
     } catch (error) {
+      console.error("Error creating budget:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid budget data", errors: error.errors });
       }
