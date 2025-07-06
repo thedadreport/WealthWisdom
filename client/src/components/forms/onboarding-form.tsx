@@ -27,7 +27,13 @@ const budgetFormSchema = insertBudgetSchema.extend({
   investmentsPercent: z.string().min(1, "Investments percentage is required"),
   savingsPercent: z.string().min(1, "Savings percentage is required"),
   guiltFreeSpendingPercent: z.string().min(1, "Guilt-free spending percentage is required"),
-});
+}).transform((data) => ({
+  ...data,
+  fixedCostsPercent: data.fixedCostsPercent,
+  investmentsPercent: data.investmentsPercent,
+  savingsPercent: data.savingsPercent,
+  guiltFreeSpendingPercent: data.guiltFreeSpendingPercent,
+}));
 
 export default function OnboardingForm() {
   const [step, setStep] = useState(1);
@@ -81,29 +87,39 @@ export default function OnboardingForm() {
       const budgetData = {
         ...data,
         userId: userId!,
-        fixedCostsPercent: data.fixedCostsPercent,
-        investmentsPercent: data.investmentsPercent,
-        savingsPercent: data.savingsPercent,
-        guiltFreeSpendingPercent: data.guiltFreeSpendingPercent,
       };
       
+      console.log('Submitting budget data:', budgetData);
       return apiRequest('POST', '/api/budgets', budgetData);
     },
-    onSuccess: () => {
-      // Update user to mark as onboarded
-      apiRequest('PATCH', `/api/users/${userId}`, { isOnboarded: true });
-      
-      toast({
-        title: "Welcome to FlowBudget!",
-        description: "Your account has been set up successfully.",
-      });
-      
-      // Redirect to dashboard
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
+    onSuccess: async () => {
+      try {
+        // Update user to mark as onboarded
+        await apiRequest('PATCH', `/api/users/${userId}`, { isOnboarded: true });
+        
+        toast({
+          title: "Welcome to FlowBudget!",
+          description: "Your account has been set up successfully.",
+        });
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+      } catch (error) {
+        console.error('Error updating user onboarding status:', error);
+        // Still show success for budget creation
+        toast({
+          title: "Budget Created",
+          description: "Your budget has been set up successfully.",
+        });
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
+      }
     },
     onError: (error) => {
+      console.error('Budget creation error:', error);
       toast({
         title: "Error",
         description: "Failed to create budget. Please try again.",
