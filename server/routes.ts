@@ -43,6 +43,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid user data", errors: error.errors });
       }
+      // Handle unique constraint violations (duplicate email)
+      if (error.code === '23505' && error.constraint === 'users_email_unique') {
+        return res.status(409).json({ message: "An account with this email already exists" });
+      }
       res.status(500).json({ message: "Internal server error" });
     }
   });
