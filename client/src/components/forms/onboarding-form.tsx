@@ -56,7 +56,7 @@ export default function OnboardingForm() {
     mutationFn: async (data: z.infer<typeof userFormSchema>) => {
       const userData = {
         ...data,
-        afterTaxIncome: parseFloat(data.afterTaxIncome),
+        afterTaxIncome: data.afterTaxIncome,
       };
       
       return apiRequest('POST', '/api/users', userData);
@@ -81,10 +81,10 @@ export default function OnboardingForm() {
       const budgetData = {
         ...data,
         userId: userId!,
-        fixedCostsPercent: parseFloat(data.fixedCostsPercent),
-        investmentsPercent: parseFloat(data.investmentsPercent),
-        savingsPercent: parseFloat(data.savingsPercent),
-        guiltFreeSpendingPercent: parseFloat(data.guiltFreeSpendingPercent),
+        fixedCostsPercent: data.fixedCostsPercent,
+        investmentsPercent: data.investmentsPercent,
+        savingsPercent: data.savingsPercent,
+        guiltFreeSpendingPercent: data.guiltFreeSpendingPercent,
       };
       
       return apiRequest('POST', '/api/budgets', budgetData);
