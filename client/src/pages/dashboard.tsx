@@ -42,16 +42,46 @@ export default function Dashboard() {
     queryKey: [`/api/automations/user/${userId}`],
   });
 
-  // If user is not found, show onboarding
+  // Show onboarding guidance for new users
   if (!user) {
     return (
       <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-xl shadow-sm border border-neutral-200">
         <h2 className="text-2xl font-bold text-neutral-900 mb-4">Welcome to FlowBudget!</h2>
         <p className="text-neutral-600 mb-6">
-          Let's get you started with setting up your personalized budget and pay schedule.
+          Set up your personalized budget based on your pay schedule and start building healthy money habits with behavioral finance insights.
         </p>
         <Button className="w-full" onClick={() => window.location.href = '/onboarding'}>
           Get Started
+        </Button>
+      </div>
+    );
+  }
+
+  // Show setup completion guidance if user exists but hasn't completed onboarding
+  if (user && !user.isOnboarded) {
+    return (
+      <div className="max-w-md mx-auto mt-20 p-6 bg-amber-50 rounded-xl shadow-sm border border-amber-200">
+        <h2 className="text-2xl font-bold text-amber-900 mb-4">Almost there, {user.firstName}!</h2>
+        <p className="text-amber-700 mb-6">
+          Complete your budget setup to start tracking your cash flow and see personalized insights.
+        </p>
+        <Button className="w-full" onClick={() => window.location.href = '/onboarding'}>
+          Complete Setup
+        </Button>
+      </div>
+    );
+  }
+
+  // Show budget setup guidance if user is onboarded but has no budget
+  if (user && user.isOnboarded && !budget) {
+    return (
+      <div className="max-w-md mx-auto mt-20 p-6 bg-blue-50 rounded-xl shadow-sm border border-blue-200">
+        <h2 className="text-2xl font-bold text-blue-900 mb-4">Welcome back, {user.firstName}!</h2>
+        <p className="text-blue-700 mb-6">
+          Your account is set up, but you haven't created your budget yet. Let's finish setting up your budget framework.
+        </p>
+        <Button className="w-full" onClick={() => window.location.href = '/budget'}>
+          Set Up Budget
         </Button>
       </div>
     );

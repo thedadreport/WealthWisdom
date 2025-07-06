@@ -10,6 +10,7 @@ interface CashFlowCardsProps {
 
 export default function CashFlowCards({ user, budget, transactions }: CashFlowCardsProps) {
   const income = parseFloat(user.afterTaxIncome);
+  const usingDefaultBudget = !budget;
   
   const defaultBudget = {
     fixedCostsPercent: 50,
@@ -74,20 +75,31 @@ export default function CashFlowCards({ user, budget, transactions }: CashFlowCa
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {cards.map((card) => {
-        const Icon = card.icon;
-        return (
-          <div key={card.title} className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-neutral-500">{card.title}</h3>
-              <Icon className={`h-5 w-5 ${card.color}`} />
+    <div className="mb-8">
+      {usingDefaultBudget && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-700">
+            <span className="font-medium">Using recommended budget allocations.</span> 
+            {" "}Set up your personal budget to see custom calculations.
+          </p>
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.title} className="bg-white rounded-xl p-6 shadow-sm border border-neutral-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-medium text-neutral-500">{card.title}</h3>
+                <Icon className={`h-5 w-5 ${card.color}`} />
+              </div>
+              <p className="text-2xl font-bold text-neutral-900">{card.value}</p>
+              <p className="text-xs text-neutral-500 mt-2">{card.subtitle}</p>
             </div>
-            <p className="text-2xl font-bold text-neutral-900">{card.value}</p>
-            <p className="text-xs text-neutral-500 mt-2">{card.subtitle}</p>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

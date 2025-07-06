@@ -1,15 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
-import { Lightbulb, ArrowRight } from "lucide-react";
+import { Lightbulb, ArrowRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Insight } from "@shared/schema";
+import { useState, useEffect } from "react";
 
 export default function PsychologyInsights() {
+  const [currentInsightIndex, setCurrentInsightIndex] = useState(0);
   const { data: insights = [] } = useQuery<Insight[]>({
     queryKey: ['/api/insights'],
   });
 
-  // Get a random insight
-  const randomInsight = insights.length > 0 ? insights[Math.floor(Math.random() * insights.length)] : null;
+  // Initialize with a random insight
+  useEffect(() => {
+    if (insights.length > 0) {
+      setCurrentInsightIndex(Math.floor(Math.random() * insights.length));
+    }
+  }, [insights]);
+
+  const currentInsight = insights[currentInsightIndex];
+
+  const nextInsight = () => {
+    if (insights.length > 1) {
+      setCurrentInsightIndex((prev) => (prev + 1) % insights.length);
+    }
+  };
 
   if (!randomInsight) {
     return (
@@ -31,13 +45,13 @@ export default function PsychologyInsights() {
         <Lightbulb className="h-5 w-5 text-amber-600 mr-3" />
         <h3 className="font-semibold text-amber-900">Money Psychology Tip</h3>
       </div>
-      <h4 className="font-medium text-amber-900 mb-2">{randomInsight.title}</h4>
+      <h4 className="font-medium text-amber-900 mb-2">{currentInsight.title}</h4>
       <p className="text-sm text-amber-800 mb-4 leading-relaxed">
-        {randomInsight.content}
+        {currentInsight.content}
       </p>
       <div className="bg-white bg-opacity-60 rounded-lg p-4 mb-4">
         <p className="text-xs text-amber-700">
-          {randomInsight.author === 'morgan-housel' ? 'Morgan Housel' : 'Ramit Sethi'} • {randomInsight.category}
+          {currentInsight.author === 'morgan-housel' ? 'Morgan Housel' : 'Ramit Sethi'} • {currentInsight.category}
         </p>
       </div>
       <Button variant="ghost" size="sm" className="text-amber-700 hover:text-amber-800 p-0">

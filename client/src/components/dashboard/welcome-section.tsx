@@ -8,9 +8,17 @@ interface WelcomeSectionProps {
 }
 
 export default function WelcomeSection({ user }: WelcomeSectionProps) {
-  const { payPeriodStart, payPeriodEnd } = calculatePayPeriod(user.paySchedule as keyof typeof PAY_SCHEDULES);
+  const { payPeriodStart, payPeriodEnd } = calculatePayPeriod(
+    user.paySchedule as keyof typeof PAY_SCHEDULES,
+    new Date(),
+    user.payDay || undefined,
+    user.lastPayDate ? new Date(user.lastPayDate) : undefined
+  );
   const daysRemaining = getDaysRemaining(payPeriodEnd);
   const payScheduleLabel = PAY_SCHEDULES[user.paySchedule as keyof typeof PAY_SCHEDULES]?.label || user.paySchedule;
+  
+  // Determine if this is a more accurate calculation
+  const hasPayDayInfo = user.payDay !== null && user.lastPayDate !== null;
 
   return (
     <div className="mb-8">
@@ -20,9 +28,14 @@ export default function WelcomeSection({ user }: WelcomeSectionProps) {
             <h2 className="text-2xl font-bold mb-2">
               Welcome back, {user.firstName}!
             </h2>
-            <p className="text-blue-100 mb-4">
+            <p className="text-blue-100 mb-2">
               Your current pay period: {formatDateRange(payPeriodStart, payPeriodEnd)}
             </p>
+            {!hasPayDayInfo && (
+              <p className="text-blue-200 text-sm mb-4">
+                Add your pay day for more accurate period tracking
+              </p>
+            )}
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2" />
