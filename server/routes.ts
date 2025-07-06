@@ -26,7 +26,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users", async (req, res) => {
     try {
       console.log("Creating user with data:", req.body);
-      const userData = insertUserSchema.parse(req.body);
+      
+      // Handle date conversion for lastPayDate if it's a string
+      const requestData = {
+        ...req.body,
+        lastPayDate: req.body.lastPayDate ? new Date(req.body.lastPayDate) : null,
+      };
+      
+      const userData = insertUserSchema.parse(requestData);
       console.log("Parsed user data:", userData);
       const user = await storage.createUser(userData);
       console.log("Created user:", user);
