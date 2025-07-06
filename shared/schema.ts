@@ -8,6 +8,8 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
   paySchedule: text("pay_schedule").notNull(), // 'weekly', 'bi-weekly', 'monthly', 'semi-monthly'
+  payDay: integer("pay_day"), // Day of month (1-31) for monthly/semi-monthly, or day of week (0-6) for weekly/bi-weekly
+  lastPayDate: timestamp("last_pay_date"), // Most recent pay date to calculate periods accurately
   afterTaxIncome: decimal("after_tax_income", { precision: 10, scale: 2 }).notNull(),
   isOnboarded: boolean("is_onboarded").default(false),
   createdAt: timestamp("created_at").defaultNow(),

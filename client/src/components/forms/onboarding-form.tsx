@@ -15,6 +15,8 @@ import { PAY_SCHEDULES } from "@/lib/constants";
 
 const userFormSchema = insertUserSchema.extend({
   afterTaxIncome: z.string().min(1, "Income is required"),
+  payDay: z.number().optional(),
+  lastPayDate: z.string().optional(),
 });
 
 const budgetFormSchema = insertBudgetSchema.extend({
@@ -57,6 +59,7 @@ export default function OnboardingForm() {
       const userData = {
         ...data,
         afterTaxIncome: data.afterTaxIncome,
+        lastPayDate: data.lastPayDate ? new Date(data.lastPayDate) : null,
       };
       
       return apiRequest('POST', '/api/users', userData);
@@ -211,6 +214,73 @@ export default function OnboardingForm() {
                   <p className="text-sm text-red-600">{userForm.formState.errors.paySchedule.message}</p>
                 )}
               </div>
+
+              {userForm.watch("paySchedule") && (
+                <div className="space-y-2">
+                  <Label htmlFor="payDay">
+                    {userForm.watch("paySchedule") === "monthly" || userForm.watch("paySchedule") === "semi-monthly" 
+                      ? "Pay Day (Day of Month)" 
+                      : "Pay Day (Day of Week)"}
+                  </Label>
+                  <Select 
+                    value={userForm.watch("payDay")?.toString()} 
+                    onValueChange={(value) => userForm.setValue("payDay", parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        userForm.watch("paySchedule") === "monthly" || userForm.watch("paySchedule") === "semi-monthly"
+                          ? "Select day of month"
+                          : "Select day of week"
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userForm.watch("paySchedule") === "monthly" || userForm.watch("paySchedule") === "semi-monthly" ? (
+                        // Day of month (1-31)
+                        Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                          <SelectItem key={day} value={day.toString()}>
+                            {day === 1 ? "1st" : day === 2 ? "2nd" : day === 3 ? "3rd" : `${day}th`}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        // Day of week (0=Sunday, 1=Monday, etc.)
+                        [
+                          { value: "0", label: "Sunday" },
+                          { value: "1", label: "Monday" }, 
+                          { value: "2", label: "Tuesday" },
+                          { value: "3", label: "Wednesday" },
+                          { value: "4", label: "Thursday" },
+                          { value: "5", label: "Friday" },
+                          { value: "6", label: "Saturday" }
+                        ].map(({ value, label }) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {userForm.formState.errors.payDay && (
+                    <p className="text-sm text-red-600">{userForm.formState.errors.payDay.message}</p>
+                  )}
+                </div>
+              )}
+
+              {userForm.watch("paySchedule") && userForm.watch("payDay") !== undefined && (
+                <div className="space-y-2">
+                  <Label htmlFor="lastPayDate">Most Recent Pay Date</Label>
+                  <Input
+                    id="lastPayDate"
+                    type="date"
+                    {...userForm.register("lastPayDate")}
+                  />
+                  <p className="text-xs text-gray-500">
+                    This helps us calculate your current pay period accurately
+                  </p>
+                  {userForm.formState.errors.lastPayDate && (
+                    <p className="text-sm text-red-600">{userForm.formState.errors.lastPayDate.message}</p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="afterTaxIncome">After-Tax Income (per pay period)</Label>

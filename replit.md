@@ -116,6 +116,8 @@ The application implements a structured budget allocation system:
 ```
 Changelog:
 - July 06, 2025. Initial setup
+- July 06, 2025. Fixed database migration and account creation issues
+- July 06, 2025. Enhanced onboarding with pay day configuration and accurate pay period calculation
 ```
 
 ## User Preferences
