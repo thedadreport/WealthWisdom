@@ -1,8 +1,22 @@
-import { 
-  users, budgets, transactions, goals, automations, insights,
-  type User, type InsertUser, type Budget, type InsertBudget,
-  type Transaction, type InsertTransaction, type Goal, type InsertGoal,
-  type Automation, type InsertAutomation, type Insight, type InsertInsight
+import {
+  users,
+  budgets,
+  transactions,
+  goals,
+  automations,
+  insights,
+  type User,
+  type InsertUser,
+  type Budget,
+  type InsertBudget,
+  type Transaction,
+  type InsertTransaction,
+  type Goal,
+  type InsertGoal,
+  type Automation,
+  type InsertAutomation,
+  type Insight,
+  type InsertInsight,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -13,32 +27,45 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
-  
+
   // Budgets
   getBudgetByUserId(userId: number): Promise<Budget | undefined>;
   createBudget(budget: InsertBudget): Promise<Budget>;
-  updateBudget(id: number, budget: Partial<InsertBudget>): Promise<Budget | undefined>;
-  
+  updateBudget(
+    id: number,
+    budget: Partial<InsertBudget>,
+  ): Promise<Budget | undefined>;
+
   // Transactions
   getTransactionsByUserId(userId: number): Promise<Transaction[]>;
-  getTransactionsByPayPeriod(userId: number, payPeriodStart: Date, payPeriodEnd: Date): Promise<Transaction[]>;
+  getTransactionsByPayPeriod(
+    userId: number,
+    payPeriodStart: Date,
+    payPeriodEnd: Date,
+  ): Promise<Transaction[]>;
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
-  updateTransaction(id: number, transaction: Partial<InsertTransaction>): Promise<Transaction | undefined>;
+  updateTransaction(
+    id: number,
+    transaction: Partial<InsertTransaction>,
+  ): Promise<Transaction | undefined>;
   deleteTransaction(id: number): Promise<boolean>;
-  
+
   // Goals
   getGoalsByUserId(userId: number): Promise<Goal[]>;
   getGoal(id: number): Promise<Goal | undefined>;
   createGoal(goal: InsertGoal): Promise<Goal>;
   updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal | undefined>;
   deleteGoal(id: number): Promise<boolean>;
-  
+
   // Automations
   getAutomationsByUserId(userId: number): Promise<Automation[]>;
   createAutomation(automation: InsertAutomation): Promise<Automation>;
-  updateAutomation(id: number, automation: Partial<InsertAutomation>): Promise<Automation | undefined>;
+  updateAutomation(
+    id: number,
+    automation: Partial<InsertAutomation>,
+  ): Promise<Automation | undefined>;
   deleteAutomation(id: number): Promise<boolean>;
-  
+
   // Insights
   getActiveInsights(): Promise<Insight[]>;
   getInsightsByAuthor(author: string): Promise<Insight[]>;
@@ -60,21 +87,24 @@ export class DatabaseStorage implements IStorage {
       const defaultInsights: InsertInsight[] = [
         {
           title: "The Psychology of Money",
-          content: "The hardest financial skill is getting the goalpost to stop moving. Your automated investments are building wealth without requiring daily decisions.",
+          content:
+            "The hardest financial skill is getting the goalpost to stop moving. Your automated investments are building wealth without requiring daily decisions.",
           author: "morgan-housel",
           category: "psychology",
           isActive: true,
         },
         {
           title: "Automation First",
-          content: "Don't rely on willpower to save money. Set up automatic transfers and let your system work for you.",
+          content:
+            "Don't rely on willpower to save money. Set up automatic transfers and let your system work for you.",
           author: "ramit-sethi",
           category: "automation",
           isActive: true,
         },
         {
           title: "Rich Life Framework",
-          content: "Money is a tool to live your Rich Life. Spend extravagantly on the things you love, and cut costs mercilessly on the things you don't.",
+          content:
+            "Money is a tool to live your Rich Life. Spend extravagantly on the things you love, and cut costs mercilessly on the things you don't.",
           author: "ramit-sethi",
           category: "mindset",
           isActive: true,
@@ -84,30 +114,47 @@ export class DatabaseStorage implements IStorage {
       await db.insert(insights).values(defaultInsights);
     } catch (error) {
       // Ignore errors for seeding - table might not exist yet
-      console.log('Note: Could not seed insights (table may not exist yet)');
+      console.log("Note: Could not seed insights (table may not exist yet)");
     }
   }
 
   // Users
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    try {
+      console.log(`Looking for user with ID: ${id}`);
+      const result = await db.select().from(users).where(eq(users.id, id));
+      console.log(`Query result:`, result);
+      const user = result[0];
+      console.log(`Found user:`, user);
+      return user || undefined;
+    } catch (error) {
+      console.error(`Error getting user ${id}:`, error);
+      return undefined;
+    }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user || undefined;
+    try {
+      const result = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email));
+      return result[0] || undefined;
+    } catch (error) {
+      console.error(`Error getting user by email ${email}:`, error);
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
-  async updateUser(id: number, updateUser: Partial<InsertUser>): Promise<User | undefined> {
+  async updateUser(
+    id: number,
+    updateUser: Partial<InsertUser>,
+  ): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set(updateUser)
@@ -118,19 +165,27 @@ export class DatabaseStorage implements IStorage {
 
   // Budgets
   async getBudgetByUserId(userId: number): Promise<Budget | undefined> {
-    const [budget] = await db.select().from(budgets).where(eq(budgets.userId, userId));
-    return budget || undefined;
+    try {
+      const result = await db
+        .select()
+        .from(budgets)
+        .where(eq(budgets.userId, userId));
+      return result[0] || undefined;
+    } catch (error) {
+      console.error(`Error getting budget for user ${userId}:`, error);
+      return undefined;
+    }
   }
 
   async createBudget(insertBudget: InsertBudget): Promise<Budget> {
-    const [budget] = await db
-      .insert(budgets)
-      .values(insertBudget)
-      .returning();
+    const [budget] = await db.insert(budgets).values(insertBudget).returning();
     return budget;
   }
 
-  async updateBudget(id: number, updateBudget: Partial<InsertBudget>): Promise<Budget | undefined> {
+  async updateBudget(
+    id: number,
+    updateBudget: Partial<InsertBudget>,
+  ): Promise<Budget | undefined> {
     const [budget] = await db
       .update(budgets)
       .set(updateBudget)
@@ -141,21 +196,51 @@ export class DatabaseStorage implements IStorage {
 
   // Transactions
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
-    const results = await db.select().from(transactions).where(eq(transactions.userId, userId));
-    return results.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    try {
+      const results = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.userId, userId));
+      return results.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
+    } catch (error) {
+      console.error(`Error getting transactions for user ${userId}:`, error);
+      return [];
+    }
   }
 
-  async getTransactionsByPayPeriod(userId: number, payPeriodStart: Date, payPeriodEnd: Date): Promise<Transaction[]> {
-    const results = await db.select().from(transactions).where(eq(transactions.userId, userId));
-    return results
-      .filter(transaction => 
-        transaction.payPeriodStart.getTime() === payPeriodStart.getTime() &&
-        transaction.payPeriodEnd.getTime() === payPeriodEnd.getTime()
-      )
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  async getTransactionsByPayPeriod(
+    userId: number,
+    payPeriodStart: Date,
+    payPeriodEnd: Date,
+  ): Promise<Transaction[]> {
+    try {
+      const results = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.userId, userId));
+      return results
+        .filter(
+          (transaction) =>
+            transaction.payPeriodStart.getTime() === payPeriodStart.getTime() &&
+            transaction.payPeriodEnd.getTime() === payPeriodEnd.getTime(),
+        )
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+    } catch (error) {
+      console.error(
+        `Error getting transactions by pay period for user ${userId}:`,
+        error,
+      );
+      return [];
+    }
   }
 
-  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+  async createTransaction(
+    insertTransaction: InsertTransaction,
+  ): Promise<Transaction> {
     const [transaction] = await db
       .insert(transactions)
       .values(insertTransaction)
@@ -163,7 +248,10 @@ export class DatabaseStorage implements IStorage {
     return transaction;
   }
 
-  async updateTransaction(id: number, updateTransaction: Partial<InsertTransaction>): Promise<Transaction | undefined> {
+  async updateTransaction(
+    id: number,
+    updateTransaction: Partial<InsertTransaction>,
+  ): Promise<Transaction | undefined> {
     const [transaction] = await db
       .update(transactions)
       .set(updateTransaction)
@@ -179,15 +267,31 @@ export class DatabaseStorage implements IStorage {
 
   // Goals
   async getGoalsByUserId(userId: number): Promise<Goal[]> {
-    const results = await db.select().from(goals).where(eq(goals.userId, userId));
-    return results
-      .filter(goal => goal.isActive)
-      .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+    try {
+      const results = await db
+        .select()
+        .from(goals)
+        .where(eq(goals.userId, userId));
+      return results
+        .filter((goal) => goal.isActive)
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
+        );
+    } catch (error) {
+      console.error(`Error getting goals for user ${userId}:`, error);
+      return [];
+    }
   }
 
   async getGoal(id: number): Promise<Goal | undefined> {
-    const [goal] = await db.select().from(goals).where(eq(goals.id, id));
-    return goal || undefined;
+    try {
+      const result = await db.select().from(goals).where(eq(goals.id, id));
+      return result[0] || undefined;
+    } catch (error) {
+      console.error(`Error getting goal ${id}:`, error);
+      return undefined;
+    }
   }
 
   async createGoal(insertGoal: InsertGoal): Promise<Goal> {
@@ -202,7 +306,10 @@ export class DatabaseStorage implements IStorage {
     return goal;
   }
 
-  async updateGoal(id: number, updateGoal: Partial<InsertGoal>): Promise<Goal | undefined> {
+  async updateGoal(
+    id: number,
+    updateGoal: Partial<InsertGoal>,
+  ): Promise<Goal | undefined> {
     const [goal] = await db
       .update(goals)
       .set(updateGoal)
@@ -218,11 +325,24 @@ export class DatabaseStorage implements IStorage {
 
   // Automations
   async getAutomationsByUserId(userId: number): Promise<Automation[]> {
-    const results = await db.select().from(automations).where(eq(automations.userId, userId));
-    return results.sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+    try {
+      const results = await db
+        .select()
+        .from(automations)
+        .where(eq(automations.userId, userId));
+      return results.sort(
+        (a, b) =>
+          new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
+      );
+    } catch (error) {
+      console.error(`Error getting automations for user ${userId}:`, error);
+      return [];
+    }
   }
 
-  async createAutomation(insertAutomation: InsertAutomation): Promise<Automation> {
+  async createAutomation(
+    insertAutomation: InsertAutomation,
+  ): Promise<Automation> {
     const [automation] = await db
       .insert(automations)
       .values({
@@ -233,7 +353,10 @@ export class DatabaseStorage implements IStorage {
     return automation;
   }
 
-  async updateAutomation(id: number, updateAutomation: Partial<InsertAutomation>): Promise<Automation | undefined> {
+  async updateAutomation(
+    id: number,
+    updateAutomation: Partial<InsertAutomation>,
+  ): Promise<Automation | undefined> {
     const [automation] = await db
       .update(automations)
       .set(updateAutomation)
@@ -249,13 +372,25 @@ export class DatabaseStorage implements IStorage {
 
   // Insights
   async getActiveInsights(): Promise<Insight[]> {
-    const results = await db.select().from(insights);
-    return results.filter(insight => insight.isActive);
+    try {
+      const results = await db.select().from(insights);
+      return results.filter((insight) => insight.isActive);
+    } catch (error) {
+      console.error("Error getting active insights:", error);
+      return [];
+    }
   }
 
   async getInsightsByAuthor(author: string): Promise<Insight[]> {
-    const results = await db.select().from(insights);
-    return results.filter(insight => insight.author === author && insight.isActive);
+    try {
+      const results = await db.select().from(insights);
+      return results.filter(
+        (insight) => insight.author === author && insight.isActive,
+      );
+    } catch (error) {
+      console.error(`Error getting insights by author ${author}:`, error);
+      return [];
+    }
   }
 
   async createInsight(insertInsight: InsertInsight): Promise<Insight> {

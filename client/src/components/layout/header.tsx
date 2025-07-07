@@ -9,11 +9,11 @@ export default function Header() {
   const isMobile = useIsMobile();
 
   const navigation = [
-    { name: 'Dashboard', href: '/' },
-    { name: 'Budget', href: '/budget' },
-    { name: 'Cash Flow', href: '/cash-flow' },
-    { name: 'Goals', href: '/goals' },
-    { name: 'Learn', href: '/learn' },
+    { name: "Dashboard", href: "/" },
+    { name: "Budget", href: "/budget" },
+    { name: "Cash Flow", href: "/cash-flow" },
+    { name: "Goals", href: "/goals" },
+    { name: "Learn", href: "/learn" },
   ];
 
   return (
@@ -21,35 +21,45 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <TrendingUp className="h-8 w-8 text-primary mr-3" />
-              <h1 className="text-xl font-bold text-neutral-900">FlowBudget</h1>
-            </div>
+            <Link href="/">
+              <div className="flex-shrink-0 flex items-center cursor-pointer">
+                <TrendingUp className="h-8 w-8 text-primary mr-3" />
+                <h1 className="text-xl font-bold text-neutral-900">
+                  FlowBudget
+                </h1>
+              </div>
+            </Link>
           </div>
-          
+
           {!isMobile && (
             <nav className="hidden md:flex space-x-8">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <a className={`px-1 pb-4 text-sm font-medium transition-colors ${
-                    location === item.href 
-                      ? 'text-primary border-b-2 border-primary' 
-                      : 'text-neutral-500 hover:text-neutral-700'
-                  }`}>
+                  <span
+                    className={`px-1 pb-4 text-sm font-medium transition-colors cursor-pointer ${
+                      location === item.href
+                        ? "text-primary border-b-2 border-primary"
+                        : "text-neutral-500 hover:text-neutral-700"
+                    }`}
+                  >
                     {item.name}
-                  </a>
+                  </span>
                 </Link>
               ))}
             </nav>
           )}
-          
+
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-neutral-500">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-neutral-400 hover:text-neutral-500"
+            >
               <Bell className="h-5 w-5" />
             </Button>
             <Avatar className="h-8 w-8">
               <AvatarFallback className="bg-primary text-white text-sm font-medium">
-                JD
+                JS
               </AvatarFallback>
             </Avatar>
           </div>
